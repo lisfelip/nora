@@ -1,6 +1,6 @@
 # Nora
 
-## Synopsis
+## Description
 
 Nora is a REST API for database management, for multiple applications. Featured:
 
