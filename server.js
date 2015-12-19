@@ -3,7 +3,8 @@ var
 	path = require('path'),
 	bodyParser = require('body-parser'),
 	crypto = require('crypto-js'),
-	test = require('./test');
+	nora = require('./nora'),
+	database = require('./database');
 
 activate();
 
@@ -23,6 +24,8 @@ function activate() {
 		})
 	    .use(bodyParser.json())
 	    .use(bodyParser.urlencoded({extended: true}));
+
+	app.use(nora.router(database));
 
 	app
 		.get('/', function(req, res) { res.sendFile(path.resolve('public/index.html')); })
