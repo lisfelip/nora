@@ -1,0 +1,23 @@
+{
+	"config": {
+		"host": "localhost",
+		"name": "example",
+		"user": "root",
+		"password": ""
+	},
+	"modeling": {
+		"player": {
+			"name": "String",
+			"scores": {"ref": "score", "rel": "ManyToOne"}
+		},
+		"game": {
+			"title": "String",
+			"scores": {"ref": "score", "rel": "ManyToOne"}
+		},
+		"score": {
+			"value": "Number",
+			"player": {"ref": "player", "rel": "OneToMany", "cascade": true},
+			"game": {"ref": "game", "rel": "OneToMany", "cascade": true}
+		}
+	}
+}

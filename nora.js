@@ -14,8 +14,9 @@ function process(database) {
 
 	forEach(m, function(entity, key) {
 		forEach(entity, function(attr, key) {
-			if (typeof(attr) == 'object') {
-				delete entity[key];
+			delete entity[key];
+			if (typeof attr == 'string') entity[key] = eval(attr);
+			else {
 				if (attr.rel === 'ManyToOne') {
 					entity[key] = [{type: oid, ref: attr.ref}];
 				} else if (attr.rel === 'OneToMany') {
@@ -30,16 +31,13 @@ function process(database) {
 
 }
 
-function router(database) {
+function route(database) {
 
-	var c = database.config;
-	var e = express();
-	var model = process(database);
-
-	forEach(model, function(m, key) {
-		var baseUrl = '/' + c.name + '/' + key;
-		
-		var defaultResponse = function(res) {
+	var 
+		c = database.config,
+		e = express(),
+		model = process(database),		
+		response = function(res) {
 			return function(err, data) {
 				mongoose.disconnect();
 				if (err) res.status(500).json({error: err});
@@ -47,22 +45,25 @@ function router(database) {
 			};
 		};
 
+	forEach(model, function(m, key) {
+		var baseUrl = '/' + c.name + '/' + key;
+
 		var find = function(req, res) {
 			mongoose.connect(dbUrl);
-			model[key].find().lean().exec(defaultResponse(res));
+			model[key].find().lean().exec(response(res));
 		};
 		e.get(baseUrl, find);
 
 		var findById = function(req, res) {
 			mongoose.connect(dbUrl);
-			model[key].findById(req.params.id, defaultResponse(res));
+			model[key].findById(req.params.id, response(res));
 		};
 		e.get(baseUrl + '/:id', findById);
 
 		var save = function(req, res) {
 			mongoose.connect(dbUrl);
 			var object = new model[key](req.body.object);
-			object.save(defaultResponse(res));
+			object.save(response(res));
 		};
 		e.post(baseUrl, save);
 	});
@@ -71,4 +72,4 @@ function router(database) {
 
 }
 
-module.exports = { router: router };
+module.exports = { route: route };

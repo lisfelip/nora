@@ -1,10 +1,11 @@
 var
-	express = require('express'),
-	path = require('path'),
 	bodyParser = require('body-parser'),
-	crypto = require('crypto-js'),
-	nora = require('./nora'),
-	database = require('./database');
+	express = require('express'),
+	forEach = require('foreach'),
+	glob = require('glob'),
+	jsonfile = require('jsonfile'),
+	path = require('path'),
+	nora = require('./nora');
 
 activate();
 
@@ -25,13 +26,20 @@ function activate() {
 	    .use(bodyParser.json())
 	    .use(bodyParser.urlencoded({extended: true}));
 
-	app.use(nora.router(database));
-
-	app
-		.get('/', function(req, res) { res.sendFile(path.resolve('public/index.html')); })
-		.use(function(req, res) { res.redirect('/'); })
-		.listen(port, ipaddress, function() {
-			console.log('Listening to 8084...');
+	glob('./apps/**/*.json', undefined, function(err, files) {
+		forEach(files, function(file) {	var i = 0;
+			jsonfile.readFile(file, function(err, database) {
+				app.use(nora.route(database));
+				if (++i == files.length) {
+					app
+						.get('/', function(req, res) { res.sendFile(path.resolve('apps/index.html')); })
+						.use(function(req, res) { res.redirect('/'); })
+						.listen(port, ipaddress, function() {
+							console.log('Listening to 8084...');
+						});
+				}
+			});
 		});
+	});
 
 }
