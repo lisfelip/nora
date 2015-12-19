@@ -39,25 +39,32 @@ function router(database) {
 	forEach(model, function(m, key) {
 		var baseUrl = '/' + c.name + '/' + key;
 		
-		var find = function(req, res) {
-			mongoose.connect(dbUrl);
-			model[key].find().lean().exec(function(err, docs) {
+		var defaultResponse = function(res) {
+			return function(err, data) {
 				mongoose.disconnect();
 				if (err) res.status(500).json({error: err});
-				else res.json({docs: docs});
-			});
+				else res.json({data: data});
+			};
+		};
+
+		var find = function(req, res) {
+			mongoose.connect(dbUrl);
+			model[key].find().lean().exec(defaultResponse(res));
 		};
 		e.get(baseUrl, find);
 
 		var findById = function(req, res) {
 			mongoose.connect(dbUrl);
-			model[key].findById(req.params.id, function(err, doc) {
-				mongoose.disconnect();
-				if (err) res.status(500).json({error: err});
-				else res.json({doc: doc});
-			});
+			model[key].findById(req.params.id, defaultResponse(res));
 		};
 		e.get(baseUrl + '/:id', findById);
+
+		var save = function(req, res) {
+			mongoose.connect(dbUrl);
+			var object = new model[key](req.body.object);
+			object.save(defaultResponse(res));
+		};
+		e.post(baseUrl, save);
 	});
 
 	return e;
