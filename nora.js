@@ -15,13 +15,14 @@ function process(database) {
 	forEach(m, function(entity, key) {
 		forEach(entity, function(attr, key) {
 			delete entity[key];
-			if (typeof attr == 'string') entity[key] = eval(attr);
-			else {
-				if (attr.rel === 'ManyToOne') {
+			if (typeof attr == 'string') {
+				var e = eval(attr);
+				if (typeof e == 'function')	entity[key] = e;
+			} else {
+				if (attr.rel === 'ManyToOne')
 					entity[key] = [{type: oid, ref: attr.ref}];
-				} else if (attr.rel === 'OneToMany') {
+				else if (attr.rel === 'OneToMany')
 					entity[key] = {type: oid, ref: attr.ref};
-				}
 			}
 		});
 		model[key] = mongoose.model(key, mongoose.Schema(entity));
@@ -50,7 +51,7 @@ function route(database) {
 
 		var find = function(req, res) {
 			mongoose.connect(dbUrl);
-			model[key].find().lean().exec(response(res));
+			model[key].find(req.query).lean().exec(response(res));
 		};
 		e.get(baseUrl, find);
 
@@ -61,9 +62,17 @@ function route(database) {
 		e.get(baseUrl + '/:id', findById);
 
 		var save = function(req, res) {
-			mongoose.connect(dbUrl);
-			var object = new model[key](req.body.object);
-			object.save(response(res));
+			if (!req.body.object) 
+				res.status(500).json({error: {message: 'No object sent'}});
+			else {
+				try {
+					mongoose.connect(dbUrl);
+					var object = new model[key](JSON.parse(req.body.object));
+					object.save(response(res));
+				} catch(err) {
+					res.status(500).json({error: {message: "Invalid object sent"}});
+				}
+			}
 		};
 		e.post(baseUrl, save);
 	});
