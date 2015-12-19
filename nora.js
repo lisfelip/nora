@@ -53,28 +53,46 @@ function route(database) {
 			mongoose.connect(dbUrl);
 			model[key].find(req.query).lean().exec(response(res));
 		};
-		e.get(baseUrl, find);
-
 		var findById = function(req, res) {
-			mongoose.connect(dbUrl);
-			model[key].findById(req.params.id, response(res));
+			if (!req.params.id)
+				res.status(500).json({error: {message: 'No ID sent'}});
+			else {
+				mongoose.connect(dbUrl);
+				model[key].findById(req.params.id, response(res));
+			}
 		};
-		e.get(baseUrl + '/:id', findById);
-
 		var save = function(req, res) {
-			if (!req.body.object) 
+			if (!req.body[key]) 
 				res.status(500).json({error: {message: 'No object sent'}});
 			else {
 				try {
 					mongoose.connect(dbUrl);
-					var object = new model[key](JSON.parse(req.body.object));
-					object.save(response(res));
+					var obj = new model[key](JSON.parse(req.body[key]));
+					obj.save(response(res));
 				} catch(err) {
 					res.status(500).json({error: {message: "Invalid object sent"}});
 				}
 			}
 		};
-		e.post(baseUrl, save);
+		var remove = function(req, res) {
+			mongoose.connect(dbUrl);
+			model[key].remove(req.query, response(res));
+		};
+		var removeById = function(req, res) {
+			if (!req.params.id)
+				res.status(500).json({error: {message: 'No ID sent'}});
+			else {
+				mongoose.connect(dbUrl);
+				model[key].remove({"_id": req.params.id}, response(res));
+			}
+		};
+
+		e
+			.get(baseUrl, find)
+			.get(baseUrl + '/:id', findById)
+			.post(baseUrl, save)
+			.delete(baseUrl, remove)
+			.delete(baseUrl + '/:id', removeById);
 	});
 
 	return e;
