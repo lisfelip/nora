@@ -5,7 +5,7 @@ var
 	glob = require('glob'),
 	jsonfile = require('jsonfile'),
 	path = require('path'),
-	nora = require('./nora');
+	nora = require('./nora/core');
 
 activate();
 
