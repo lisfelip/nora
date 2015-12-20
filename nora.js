@@ -24,7 +24,7 @@ function process(database) {
 					entity[key] = [{type: oid, ref: attr.ref}];
 				else if (attr.rel === 'OneToMany')
 					entity[key] = {type: oid, ref: attr.ref};
-				if (attr.cascade) cascade.push({ref: attr.ref, attr: attr.cascade});
+				if (attr.cascade) cascade.push({ref: attr.ref, attr: attr.cascade, rel: attr.rel});
 			}
 		});
 		var schema = mongoose.Schema(entity);
@@ -37,21 +37,24 @@ function process(database) {
 						save = function(idx) {
 							if (idx == cascade.length) next();
 							else {
-								var glass = true;
-								if (idx === 0)
-									for(var i = 0; i < cascade.length && glass; i++)
-										if(!obj[cascade[i].ref]) { glass = false; done(); }
-								if (glass) {
-									var cur = cascade[idx];
-									model[cur.ref].findById(obj[cur.ref], function(err, doc) {
-										if (err) done();
-										else {
-											doc[cur.attr].push(obj._id);
-											doc.save(function(err, doc) {
-												if (err) done(); else save(++idx);
-											});
-										}
-									});
+								if (cascade[idx].rel == 'ManyToOne') save(++idx);
+								else {
+									var glass = true;
+									if (idx === 0)
+										for(var i = 0; i < cascade.length && glass; i++)
+											if(!obj[cascade[i].ref]) { glass = false; done(); }
+									if (glass) {
+										var cur = cascade[idx];
+										model[cur.ref].findById(obj[cur.ref], function(err, doc) {
+											if (err) done();
+											else {
+												doc[cur.attr].push(obj._id);
+												doc.save(function(err, doc) {
+													if (err) done(); else save(++idx);
+												});
+											}
+										});
+									}
 								}
 							}
 						}; save(0);
@@ -63,13 +66,23 @@ function process(database) {
 							if (idx == cascade.length) next();
 							else {
 								var cur = cascade[idx];
-								model[cur.ref].findById(obj[cur.ref], function(err, doc) {
-									var i = doc[cur.attr].indexOf(obj._id);
-									doc[cur.attr].splice(i, 1);
-									doc.save(function(err, doc) {
-										if (err) done(); else remove(++idx);
+								if (cur.rel == 'ManyToOne') {
+									var query = {$or: []};
+									forEach(obj[cur.attr], function(item) {
+										query.$or.push({'_id': item});
 									});
-								});
+									model[cur.ref].remove(query, function(err, doc) {
+										next();
+									});
+								} else {
+									model[cur.ref].findById(obj[cur.ref], function(err, doc) {
+										var i = doc[cur.attr].indexOf(obj._id);
+										doc[cur.attr].splice(i, 1);
+										doc.save(function(err, doc) {
+											if (err) done(); else remove(++idx);
+										});
+									});
+								}
 							}
 						}; remove(0);
 				});
@@ -121,6 +134,9 @@ function route(database) {
 					res.status(500).json({error: {message: "Invalid object sent"}});
 				}
 			}
+		};
+		var update = function(req, res) {
+
 		};
 		var remove = function(req, res) {
 			mongoose.connect(dbUrl);
