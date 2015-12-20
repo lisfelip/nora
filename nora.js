@@ -13,6 +13,7 @@ function process(database) {
 	dbUrl =  'mongodb://' + c.host + '/' + c.name;
 
 	forEach(m, function(entity, key) {
+		var cascade = [];
 		forEach(entity, function(attr, key) {
 			delete entity[key];
 			if (typeof attr == 'string') {
@@ -23,9 +24,27 @@ function process(database) {
 					entity[key] = [{type: oid, ref: attr.ref}];
 				else if (attr.rel === 'OneToMany')
 					entity[key] = {type: oid, ref: attr.ref};
+				if (attr.cascade) cascade.push(attr.ref);
 			}
 		});
-		model[key] = mongoose.model(key, mongoose.Schema(entity));
+		var schema = mongoose.Schema(entity);
+		model[key] = mongoose.model(key, schema);
+		if (cascade.length) {
+			schema
+				.pre('save', function(next, done) {
+					var obj = this;
+					forEach(cascade, function(val) {
+						if (!obj[val]) done();
+						model[key].findById(obj[val], function(err, doc) {
+							
+						});
+					});
+					next();
+				})
+				.pre('remove', function(next, done) {
+					next();
+				});
+		}
 	});
 
 	return model;
