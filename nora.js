@@ -24,7 +24,7 @@ function process(database) {
 					entity[key] = [{type: oid, ref: attr.ref}];
 				else if (attr.rel === 'OneToMany')
 					entity[key] = {type: oid, ref: attr.ref};
-				if (attr.cascade) cascade.push(attr.ref);
+				if (attr.cascade) cascade.push({ref: attr.ref, attr: attr.cascade});
 			}
 		});
 		var schema = mongoose.Schema(entity);
@@ -32,14 +32,29 @@ function process(database) {
 		if (cascade.length) {
 			schema
 				.pre('save', function(next, done) {
-					var obj = this;
-					forEach(cascade, function(val) {
-						if (!obj[val]) done();
-						model[key].findById(obj[val], function(err, doc) {
-							
-						});
-					});
-					next();
+					var 
+						obj = this,
+						save = function(idx) {
+							if (idx == cascade.length) next();
+							else {
+								var glass = true;
+								if (idx === 0)
+									for(var i = 0; i < cascade.length && glass; i++)
+										if(!obj[cascade[i].ref]) { glass = false; done(); }
+								if (glass) {
+									var cur = cascade[idx];
+									model[cur.ref].findById(obj[cur.ref], function(err, doc) {
+										if (err) done();
+										else {
+											doc[cur.attr].push(obj._id);
+											doc.save(function(err, doc) {
+												if (err) done(); else save(++idx);
+											});
+										}
+									});
+								}
+							}
+						}; save(0);
 				})
 				.pre('remove', function(next, done) {
 					next();

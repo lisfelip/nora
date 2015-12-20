@@ -16,18 +16,8 @@
 		},
 		"score": {
 			"value": "Number",
-			"player": {
-				"ref": "player", 
-				"rel": "OneToMany", 
-				"cascade": true, 
-				"attr": "scores"
-			},
-			"game": {
-				"ref": "game", 
-				"rel": "OneToMany", 
-				"cascade": true, 
-				"attr": "scores"
-			}
+			"player": {"ref": "player", "rel": "OneToMany", "cascade": "scores"},
+			"game": { "ref": "game", "rel": "OneToMany", "cascade": "scores"}
 		}
 	}
 }
