@@ -26,13 +26,13 @@ function activate() {
 	    .use(bodyParser.json())
 	    .use(bodyParser.urlencoded({extended: true}));
 
-	glob('./apps/**/*.json', undefined, function(err, files) {
+	glob('./database/**/*.json', undefined, function(err, files) {
 		forEach(files, function(file) {	var i = 0;
 			jsonfile.readFile(file, function(err, database) {
 				app.use(nora.route(database));
 				if (++i == files.length) {
 					app
-						.get('/', function(req, res) { res.sendFile(path.resolve('apps/index.html')); })
+						.get('/', function(req, res) { res.sendFile(path.resolve('public/index.html')); })
 						.use(function(req, res) { res.redirect('/'); })
 						.listen(port, ipaddress, function() {
 							console.log('Listening to 8084...');
