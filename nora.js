@@ -57,7 +57,21 @@ function process(database) {
 						}; save(0);
 				})
 				.pre('remove', function(next, done) {
-					next();
+					var 
+						obj = this,
+						remove = function(idx) {
+							if (idx == cascade.length) next();
+							else {
+								var cur = cascade[idx];
+								model[cur.ref].findById(obj[cur.ref], function(err, doc) {
+									var i = doc[cur.attr].indexOf(obj._id);
+									doc[cur.attr].splice(i, 1);
+									doc.save(function(err, doc) {
+										if (err) done(); else remove(++idx);
+									});
+								});
+							}
+						}; remove(0);
 				});
 		}
 	});
@@ -110,14 +124,20 @@ function route(database) {
 		};
 		var remove = function(req, res) {
 			mongoose.connect(dbUrl);
-			model[key].remove(req.query, response(res));
+			model[key].find(req.query, function(err, doc) {
+				if (err) res.status(500).json({error: err});
+				doc.remove(response(res));
+			});
 		};
 		var removeById = function(req, res) {
 			if (!req.params.id)
 				res.status(500).json({error: {message: 'No ID sent'}});
 			else {
 				mongoose.connect(dbUrl);
-				model[key].remove({"_id": req.params.id}, response(res));
+				model[key].findById({"_id": req.params.id}, function(err, doc) {
+					if (err) res.status(500).json({error: err});
+					doc.remove(response(res));
+				});
 			}
 		};
 
