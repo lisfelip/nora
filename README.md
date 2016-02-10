@@ -1,14 +1,25 @@
-# Nora
+# NORA
 
 ## Description
 
-Nora is a REST API for database management, for multiple applications. Featured:
++ Nora is a REST API for relational database management, for multiple applications;
++ Starter project for node.js.
 
-* Mongo DB
-* Node
+Featured:
 
-## Quick Start
+* Node.js
+* Gulp
+* Bower
+* Jade
+* SASS
+* CoffeeScript
+
+## Quick Install
 
 1. npm install
-2. Include your application on Nora.
-3. Start serving!
+2. gulp
+3. Happy coding!
+
+## Hosting
+
+1. Just send the file **package.json** and the folder **server**

@@ -1,0 +1,11 @@
+{
+	"test": {
+		"host": "localhost",
+		"username": "root",
+		"password": "",
+		"database": "nodestarter_test",
+		"dialect": "mysql"
+	},
+	"development": {},
+	"production": {}
+}

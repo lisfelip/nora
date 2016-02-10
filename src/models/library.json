@@ -1,0 +1,10 @@
+{
+	"user": {
+		"first_name": {"type": "STRING"},
+		"last_name": {"type": "STRING"}
+	},
+	"book": {
+		"title": {"type": "STRING"},
+		"genre": {"type": "STRING"}
+	}
+}
