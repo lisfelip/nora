@@ -2,7 +2,7 @@
 
 ## Description
 
-+ Nora is a REST API for relational database management, for multiple applications;
++ Nora is a REST API for relational database management, for multiple applications.
 + Starter project for node.js.
 
 Featured:
@@ -22,4 +22,4 @@ Featured:
 
 ## Hosting
 
-1. Just send the file **package.json** and the folder **server**
+1. Just send the file **package.json** and the folder **server** (Node.js)
