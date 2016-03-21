@@ -1,6 +1,6 @@
-express = require 'express'
-each = require 'foreach'
-compiler = require './compiler'
+express = require "express"
+each = require "foreach"
+compiler = require "./compiler"
 
 route = (database)->
 	model = require "./../models/#{database}.json"
@@ -20,12 +20,12 @@ route = (database)->
 					if data
 						res.json {success: true, data: data}
 					else
-						res.json {success: false, message: 'ID not found'}
+						res.json {success: false, message: "ID not found"}
 
 	create = (table, obj)->
 		(req, res)->
 			obj.sync()
-				.then ()->
+				.then ->
 					delete req.body.id
 					obj.create(req.body)
 					res.json {success: true, data: req.body}
@@ -36,10 +36,10 @@ route = (database)->
 				.then (data)->
 					if data
 						data.update(req.body)
-							.then ()->
+							.then ->
 								res.json {success: true, data: data}
 					else
-						res.json {success: false, message: 'ID not found'}
+						res.json {success: false, message: "ID not found"}
 
 	remove = (table, obj)->
 		(req, res)->
@@ -47,10 +47,10 @@ route = (database)->
 				.then (data)->
 					if data
 						data.destroy()
-							.then ()->
+							.then ->
 								res.json {success: true, data: data}
 					else
-						res.json {success: false, message: 'ID not found'}
+						res.json {success: false, message: "ID not found"}
 
 	for table, obj of seq	
 		routes.get "/#{database}/#{table}", findAll(table, obj)

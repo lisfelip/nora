@@ -1,5 +1,5 @@
-Sequelize = require 'sequelize'
-db = require './../config/database.json'
+Sequelize = require "sequelize"
+db = require "./../config/database.json"
 	.test
 
 sequelize = new Sequelize db.database, db.username, db.password, db

@@ -1,8 +1,8 @@
-express = require 'express'
-bodyParser = require 'body-parser'
-manager = require './manager/core'
+express = require "express"
+bodyParser = require "body-parser"
+manager = require "./manager/core"
 
-http = require './config/http.json'
+http = require "./config/http.json"
 
 if (process.env.OPENSHIFT_NODEJS_IP) 
 	http.host = process.env.OPENSHIFT_NODEJS_IP
@@ -13,19 +13,17 @@ app = express()
 
 app
 	.use (req, res, next)->
-		res.header 'Access-Control-Allow-Origin', '*';
-		res.header 'Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS';
-		res.header 'Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With';
+		res.header "Access-Control-Allow-Origin", "*";
 		next()
 	.use bodyParser.json()
 	.use bodyParser.urlencoded({extended: true})
 
-routes = manager.route 'library'
+routes = manager.route "library"
 app.use routes
 
 app
-	.use '/', express.static './server/public'
+	.use "/", express.static "./server/public"
 	.use (req, res)->
-		res.redirect('/')
+		res.redirect("/")
 	.listen http.port, http.host, ()->
 		console.log "Listening to #{http.host}:#{http.port}..."
