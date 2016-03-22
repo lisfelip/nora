@@ -6,6 +6,7 @@ route = (database)->
 	model = require "./../models/#{database}.json"
 	seq = compiler.compile(model)
 	routes = express()
+	require "./../controllers/#{database}"
 
 	findAll = (table, obj)->
 		(req, res)->
