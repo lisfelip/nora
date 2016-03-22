@@ -1,10 +1,44 @@
 {
 	"user": {
-		"first_name": {"type": "STRING"},
-		"last_name": {"type": "STRING"}
+		"fields": {
+			"username": {"type": "STRING"}
+		}
 	},
 	"book": {
-		"title": {"type": "STRING"},
-		"genre": {"type": "STRING"}
+		"fields": {
+			"title": {"type": "STRING"}
+		},
+		"rel": {
+			"image": {
+				"type": "oneToMany",
+			},
+			"user": {
+				"type": "manyToMany",
+				"assoc": {
+					"name": "rent", 
+					"fields": {
+						"date": {"type": "DATE"}
+					}
+				}
+			}
+		}
+	},
+	"author": {
+		"fields": {
+			"name": {
+				"type": "STRING"
+			}
+		},
+		"rel": {
+			"book": {
+				"type": "manyToMany",
+				"assoc": {"name": "ownership"}
+			}
+		}
+	},
+	"image": {
+		"fields": {
+			"path": {"type": "STRING"}
+		}
 	}
 }
