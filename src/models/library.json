@@ -10,7 +10,7 @@
 		},
 		"rel": {
 			"image": {
-				"type": "oneToMany",
+				"type": "oneToMany"
 			},
 			"user": {
 				"type": "manyToMany",
